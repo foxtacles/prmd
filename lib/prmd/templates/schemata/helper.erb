@@ -181,12 +181,18 @@
       example = "`null`"
     end
 
-    type = if value['type'].include?('null')
+    types = value['type'] || []
+    if value['oneOf']
+      types = value['oneOf'].map { |part| part['type'] || [] }.sum([]).uniq
+    end
+
+    type = if types.include?('null')
       'nullable '
     else
       ''
     end
-    type += (value['format'] || (value['type'] - ['null']).join(' or '))
+
+    type += (value['format'] || (types - ['null']).first || '')
     [key, type, description, example]
   end
 
